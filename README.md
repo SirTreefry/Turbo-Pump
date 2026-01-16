@@ -20,6 +20,9 @@ PUMPA code is designed for impeller off design meanline generating Head v Flow a
 Code PUMPA1 file is used for Geometry inputs , while PUMPA2 is used for basic entry geometry but secondary R2 A2 geometry in the 
 graph us unkown utilizes a newton numerical method to find. Units are in imperial.
 
+Generated Graph 1:
+
+
 
 IMPULSE Turbine script:
 
