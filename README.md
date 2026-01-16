@@ -22,7 +22,7 @@ graph us unkown utilizes a newton numerical method to find. Units are in imperia
 
 Generated Graph 1:
 
-![Graph](Figure 2026-01-16 180250.png)
+![Graph1](Figure_2026-01-16_180250.png)
 
 
 
