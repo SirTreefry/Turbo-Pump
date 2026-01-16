@@ -10,4 +10,6 @@ Based on this paper: https://www.researchgate.net/publication/325766412_Modeling
 
 PUMPA NASA code:
 
+![Pump](Pump-stage-with-axial-inducer-and-centrifugal-impeller.png)
+
 
