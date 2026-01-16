@@ -11,5 +11,8 @@ Based on this paper: https://www.researchgate.net/publication/325766412_Modeling
 PUMPA NASA code:
 
 ![Pump](Pump-stage-with-axial-inducer-and-centrifugal-impeller.png)
+PUMPA code is designed for impeller off design meanline generating Head v Flow and Exit Pressure v Flow Anylasis
+Code PUMPA1 file is used for Geometry inputs , while PUMPA2 is used for basic entry geometry but secondary R2 A2 geometry in the 
+graph us unkown utilizes a newton numerical method to find. Units are in imperial.
 
 
