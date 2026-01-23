@@ -1,0 +1,227 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Dec 19 16:16:32 2025
+
+@author: trefr
+"""
+import numpy as np
+import math
+#Impulse turbine Design
+#Constant for Gas/Physics
+g = 32.2
+
+
+
+
+#Airfoil Curtis Design
+#====================================
+
+#Combustion Parameters
+
+#Specific heat at constant pressure at inlet
+
+
+gamma = 1.124
+
+H_in = 359
+#total energy of gases (CEA tools needed)
+deltaH = H_in*(1 - 0.06) #~Cab also be a formual based on Pressue ratio too and also about 
+#6 percent enthalpy drop in rotor stator blades
+
+#Joules equivlanet
+J = 778
+
+Cp = .653
+
+R = 56.2
+#Intial Parameters
+#==================================
+T0 = 1860
+
+#mass flow rate
+wn = 92#0.23309695443
+
+#intial pressure p0
+p0 = 640
+
+#Turbine Nozzle Design
+Kn = .96
+
+C0 = 200
+
+n_eff = Kn**2
+
+
+
+#nozzle exit angle (Deg)
+a1 = 25
+
+#RPM
+N = 7000
+
+
+#From Nozzle entry to exit point 1 - > 2
+P1 = p0*(1 - deltaH/(Cp*T0))**(gamma/(gamma -1))
+
+C1 = Kn*(2*g*J*deltaH)**.5
+
+#Nozzle Effiency
+
+
+#Spouting velocity
+Vsp = C1/C0
+
+qnr = ((1 - Kn**2)*C1**2)/(Kn**2 * 2*g*J)
+
+T1_i = T0 - deltaH/Cp #Isentropic expansion
+
+T1 = T1_i + qnr/Cp #Actual Temp
+
+rho1 = (P1 / T1)*(144/R)
+
+U = C1*math.cos(a1*np.pi/180)/4 #mean diameter peripheral velocity
+
+#turbine rotor mean diameter
+dm = (720 * U)/(np.pi * N)
+
+#relative gas angle at inlet of rotor blade or nozzle exit
+beta1 = math.atan((C1*math.sin(a1*np.pi/180))/(C1*math.cos(a1*np.pi/180) - U))*180/np.pi
+
+#relative velcoity at nozzle exit 1
+V1 = (C1*math.sin(a1*np.pi/180))/(math.sin(beta1*np.pi/180))
+
+
+#reaction 1 -> 2 for one rotor stages (can edit later for 2 stage)
+#=================================================================
+#Rotor stator blade coeffs
+Kb = .89
+
+
+
+deltaH_1_2 = 0.06*H_in/3
+
+#relative gas flow rate at exit
+V2 = ((Kb*V1)**2 + 2*g*J*n_eff)**.5
+
+#reheat nozzle
+qbr = (1 - Kb**2)*(V1**2 / (2*g*J)) + (1 - n_eff)*deltaH_1_2
+
+
+P2 = P1*(1 - deltaH_1_2/(Cp*T1))**(gamma/(gamma - 1))
+
+T2_i = T1 - deltaH_1_2/Cp
+
+T2 = T2_i + qbr/Cp
+
+
+#relative exit angle editable parameter
+b2 = 25
+
+#actual exit angle
+a2 = math.atan((V2*math.sin(b2*np.pi/180))/(V2*math.cos(b2*np.pi/180) - U))*180/np.pi
+
+#absolute flow velocity
+C2 = V2*math.sin(b2*np.pi/180)/math.sin(a2*np.pi/180)
+
+E2b = (U/g)*(C1*math.cos(a1*np.pi/180) + C2*math.cos(a2*np.pi/180)) #ft/Ib*S
+
+T_eff = (U/(g*J*H_in))*(C1*math.cos(a1*np.pi/180) + C2*math.cos(a2*np.pi/180))
+
+vratio = U/C1
+
+rho2 = (144*P2)/(T2*R)
+
+#Nozzle Geometry
+#======================================
+#The throat coefficient is usually higher (closer to 1.0) than the exit coefficient
+#Nozzle aspect ratio
+asp = 9.7
+
+#nozzle throat area coeffcient
+ent = 0.97
+
+#nozzle exit area coeffcient
+ene = 0.95
+
+#Rotor and stator blade exit area coefficient
+eb2 = 0.95
+
+#Partition thickness at the exit of nozzles and blades
+tn = 0.05
+
+#radial height at nozzle throat
+hnt = 1.5
+
+Ant = wn/(ent*p0*(g*(2/(gamma+1))**((gamma + 1)/(gamma - 1)) / (R*T0))**.5)
+
+#nozzle throat width
+bnt = hnt/asp
+
+#number of nozzles
+zn = Ant/(bnt*hnt)
+
+#Pitch or nozzle spacing
+Pn = (dm*np.pi)/zn
+
+#Nozzle exit angle 1 deg between nozzle angle and flow angle
+phi_n = a1 - 2
+
+#Nozzle exit area
+Ane = (144*wn)/(rho1*C1*ene)
+
+#nozzle exit height
+hne = Ane / (np.pi*dm*math.sin(phi_n*np.pi/180) - zn*tn)
+
+#nozzle exit width
+bne = (Ane/zn)/hne
+
+
+#Rotor Geometry 
+#======================================
+#chord length of blade
+cb = 1.4
+
+
+tb = tn
+
+#blade solidity
+bsolid = 1.82
+
+#blade pitch
+pbr = cb/bsolid
+
+#inlet blade angle
+phi_b1 = beta1 + 2.7
+
+#exit angle
+phi_b2 = b2
+
+#blade radial height at entrance
+hb1r1 = hne *(1.08)
+
+#blade passage width st exit
+b_b1 = pbr*math.sin(phi_b1*np.pi/180) - tb
+
+#total blade exit area
+A_br2 = (144*wn)/(rho2*V2*eb2)
+
+#total exit blade height
+hb2 = A_br2/(np.pi*dm*math.sin(phi_b2*np.pi/180) - zn*tb) 
+
+
+
+#mean radial height
+hbr1_mean = (hb1r1 + hb2)/2
+
+#tensile forces shrouds (timken alloy in this setting)
+Scr1 =  0.0004572*(1/g)*rho2*hb1r1*dm*N**2
+
+#rotor pressure calculations
+#==================================
+L  = rho2*V2**2 * cb *math.sin(a2*np.pi/180) / hb2
+
+
+#Zwefeil coordninates (optimum design ~0.8 -> 1)
+#======================================
+Phi_z = 2*(C2/hb2)*(L/(rho2*C2*pbr))*math.cos((a1+a2)/2 * np.pi/180)**2
+
