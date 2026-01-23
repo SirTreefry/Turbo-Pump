@@ -216,12 +216,9 @@ hbr1_mean = (hb1r1 + hb2)/2
 #tensile forces shrouds (timken alloy in this setting)
 Scr1 =  0.0004572*(1/g)*rho2*hb1r1*dm*N**2
 
-#rotor pressure calculations
-#==================================
-L  = rho2*V2**2 * cb *math.sin(a2*np.pi/180) / hb2
-
-
 #Zwefeil coordninates (optimum design ~0.8 -> 1)
 #======================================
-Phi_z = 2*(C2/hb2)*(L/(rho2*C2*pbr))*math.cos((a1+a2)/2 * np.pi/180)**2
+Phi_z = 2*(pbr/cb)*(math.atan(a1) + math.atan(a2))*math.cos(a2)**2
+
+print(Phi_z)
 
