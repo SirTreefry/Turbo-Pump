@@ -222,3 +222,15 @@ Phi_z = 2*(pbr/cb)*(math.atan(a1) + math.atan(a2))*math.cos(a2)**2
 
 print(Phi_z)
 
+#Soderberg correlation
+#====================================
+#nominal loss coeffcient
+nom_lo_coeff = 0.04 + 0.06*((a1 + a2)/100)**2
+
+#blade aspect ratio correction
+blade_loss = (1 + nom_lo_coeff)*(0.975 + 0.075*(cb/hbr1_mean)) - 1
+
+
+print(nom_lo_coeff)
+print(blade_loss)                                 
+
