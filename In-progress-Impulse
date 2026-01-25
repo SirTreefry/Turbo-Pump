@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Sat Jan 24 08:23:52 2026
+
+@author: trefr
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Fri Dec 19 16:16:32 2025
 
 @author: trefr
@@ -31,6 +38,9 @@ deltaH = H_in*(1 - 0.06) #~Cab also be a formual based on Pressue ratio too and 
 #Joules equivlanet
 J = 778
 
+rho = .0765
+
+
 Cp = .653
 
 R = 56.2
@@ -43,6 +53,8 @@ wn = 92#0.23309695443
 
 #intial pressure p0
 p0 = 640
+
+s = H_in + p0*(1/R)
 
 #Turbine Nozzle Design
 Kn = .96
@@ -91,14 +103,14 @@ beta1 = math.atan((C1*math.sin(a1*np.pi/180))/(C1*math.cos(a1*np.pi/180) - U))*1
 V1 = (C1*math.sin(a1*np.pi/180))/(math.sin(beta1*np.pi/180))
 
 
-#reaction 1 -> 2 for one rotor stages (can edit later for 2 stage)
+#reaction 1 -> 2 for two rotor stages (can edit later for 1 stage)
 #=================================================================
 #Rotor stator blade coeffs
 Kb = .89
 
 
 
-deltaH_1_2 = 0.06*H_in/3
+deltaH_1_2 = 0.06*H_in
 
 #relative gas flow rate at exit
 V2 = ((Kb*V1)**2 + 2*g*J*n_eff)**.5
@@ -176,7 +188,7 @@ hne = Ane / (np.pi*dm*math.sin(phi_n*np.pi/180) - zn*tn)
 bne = (Ane/zn)/hne
 
 
-#Rotor Geometry 
+#Rotor Geometry (incomplete)
 #======================================
 #chord length of blade
 cb = 1.4
@@ -209,28 +221,117 @@ A_br2 = (144*wn)/(rho2*V2*eb2)
 hb2 = A_br2/(np.pi*dm*math.sin(phi_b2*np.pi/180) - zn*tb) 
 
 
-
 #mean radial height
 hbr1_mean = (hb1r1 + hb2)/2
 
 #tensile forces shrouds (timken alloy in this setting)
 Scr1 =  0.0004572*(1/g)*rho2*hb1r1*dm*N**2
 
+
+
 #Zwefeil coordninates (optimum design ~0.8 -> 1)
 #======================================
-Phi_z = 2*(pbr/cb)*(math.atan(a1) + math.atan(a2))*math.cos(a2)**2
+Phi_z = 2*(pbr/cb)*(math.atan(beta1*np.pi/180) + math.atan(b2*np.pi/180))*math.cos(b2*np.pi/180)**2
 
 print(Phi_z)
 
-#Soderberg correlation
+
+#====================================
+#Soderberg correlation Inner loop
 #====================================
 #nominal loss coeffcient
-nom_lo_coeff = 0.04 + 0.06*((a1 + a2)/100)**2
+i = 8
+for i in range(8):
+    #hydraulic turbine diameter
+    
+    D = (2*pbr*hbr1_mean*math.cos(b2))/(pbr*math.cos(b2) + hbr1_mean)
 
-#blade aspect ratio correction
-blade_loss = (1 + nom_lo_coeff)*(0.975 + 0.075*(cb/hbr1_mean)) - 1
+
+    nu = .373*10**(-4)
+      #reynolds number nozzle exit
+    Re = (rho*V2*D)/nu
 
 
-print(nom_lo_coeff)
-print(blade_loss)                                 
+    nom_lo_coeff = 0.04 + 0.06*((beta1 + b2)/100)**2
 
+    #blade aspect ratio correction
+    blade_loss = (1 + nom_lo_coeff)*(0.975 + 0.075*(cb/hbr1_mean)) - 1
+
+    lo_coeff = (10**5 / Re)**.25 * blade_loss
+
+    H_actual_rep = lo_coeff*V2**2 /(2 * 32.174 * 778) - H_in
+
+    H_actual = H_actual_rep
+
+
+
+    deltaH_1_2_s = H_actual*lo_coeff
+    
+
+    #relative gas flow rate at exit
+    V2 = ((Kb*V1)**2 + 2*g*J*n_eff)**.5
+
+    #reheat nozzle
+    qbr = (1 - Kb**2)*(V1**2 / (2*g*J)) + (1 - n_eff)*deltaH_1_2
+
+
+    P2 = P1*(1 - deltaH_1_2/(Cp*T1))**(gamma/(gamma - 1))
+
+    T2_i = T1 - deltaH_1_2/Cp
+
+    T2 = T2_i + qbr/Cp
+
+
+    #relative exit angle editable parameter
+    b2 = 25
+
+    #actual exit angle
+    a2 = math.atan((V2*math.sin(b2*np.pi/180))/(V2*math.cos(b2*np.pi/180) - U))*180/np.pi
+
+    #absolute flow velocity
+    C2 = V2*math.sin(b2*np.pi/180)/math.sin(a2*np.pi/180)
+
+    E2b = (U/g)*(C1*math.cos(a1*np.pi/180) + C2*math.cos(a2*np.pi/180)) #ft/Ib*S
+    
+    T_eff = (U/(g*J*H_in))*(C1*math.cos(a1*np.pi/180) + C2*math.cos(a2*np.pi/180))
+    
+    #From Nozzle entry to exit point 1 - > 2
+    P1 = p0*(1 - deltaH/(Cp*T0))**(gamma/(gamma -1))
+
+    C1 = Kn*(2*g*J*deltaH)**.5
+
+    #Nozzle Effiency
+    
+    #Input new calculated Parameters
+    
+    #T
+    #P
+    #H
+
+
+    #Spouting velocity
+    Vsp = C1/C0
+
+    qnr = ((1 - Kn**2)*C1**2)/(Kn**2 * 2*g*J)
+
+    T1_i = T0 - deltaH/Cp #Isentropic expansion
+
+    T1 = T1_i + qnr/Cp #Actual Temp
+
+    rho1 = (P1 / T1)*(144/R)
+
+    U = C1*math.cos(a1*np.pi/180)/4 #mean diameter peripheral velocity
+
+    #turbine rotor mean diameter
+    dm = (720 * U)/(np.pi * N)
+
+    #relative gas angle at inlet of rotor blade or nozzle exit
+    beta1 = math.atan((C1*math.sin(a1*np.pi/180))/(C1*math.cos(a1*np.pi/180) - U))*180/np.pi
+
+    #relative velcoity at nozzle exit 1
+    V1 = (C1*math.sin(a1*np.pi/180))/(math.sin(beta1*np.pi/180))
+
+
+
+               
+    print(lo_coeff)
